@@ -11,12 +11,14 @@ function CardRecipe({ food, page, index }: CardRecipeProps) {
   const [copied, setCopied] = useState(false);
   const { image, name, nationality, category, tags, doneDate, type, id } = food;
   const dataTest = `${index}-horizontal-`;
-  const link = `http://localhost:3000/${type}s/${id}`;
+  const link = `http://app-de-receitas-trybe.vercel.app/${type}s/${id}`;
 
   const testIdName = (page === 'recipes') ? (`${index}-card-name`) : (`${dataTest}name`);
   const testIdImg = (page === 'recipes') ? (`${index}-card-img`) : (`${dataTest}image`);
 
   const copyToClipBoard = () => {
+    console.log('Copied');
+
     navigator.clipboard.writeText(link);
     setCopied(true);
   };
