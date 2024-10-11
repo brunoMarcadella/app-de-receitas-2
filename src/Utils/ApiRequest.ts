@@ -35,7 +35,12 @@ const createUrlFood = (type: string, action : string, input : string) => {
       return newUrl;
     }
     default:
-    { return `${url}search.php?s=${input}`; }
+    {
+      const newUrl = (type === 'drinks')
+        ? (`${url}filter.php?a=Alcoholic`)
+        : (`${url}search.php?s=${input}`);
+      return newUrl;
+    }
   }
 };
 
