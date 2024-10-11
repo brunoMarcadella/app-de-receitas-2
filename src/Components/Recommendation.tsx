@@ -19,14 +19,16 @@ interface Recipe {
 function Recommendations({ type }: Props) {
   const [recommendations, setRecommendations] = useState<Recipe[]>([]);
   const path = window.location.pathname;
+
   useEffect(() => {
     const fetchRecommendation = async () => {
       try {
         const responseSearch = await fetch(
           type === 'meals'
-            ? 'https://www.thecocktaildb.com/api/json/v1/1/search.php?s='
+            ? 'https://www.thecocktaildb.com/api/json/v1/1/filter.php?a=Alcoholic'
             : 'https://www.themealdb.com/api/json/v1/1/search.php?s=',
         );
+
         const dataSearch = await responseSearch.json();
 
         setRecommendations(dataSearch.meals || dataSearch.drinks);
