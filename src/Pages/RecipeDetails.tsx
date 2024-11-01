@@ -25,8 +25,12 @@ function RecipeDetails() {
 
   useEffect(() => {
     const path = window.location.pathname;
+    console.log('path: ', path);
+
     const newFood = path.split('/')[1];
+    console.log('newFood: ', newFood);
     const newId = path.split('/')[2];
+    console.log('newId: ', newId);
     const recipeDone = JSON.parse(localStorage.getItem('doneRecipes') || '[]');
     const isRecipeDone = recipeDone.some((recipe: any) => recipe.id === newId);
     const recipesInProgress = JSON.parse(localStorage.getItem('inProgressRecipes')
