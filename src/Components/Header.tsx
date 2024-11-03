@@ -69,7 +69,7 @@ function Header() {
         setTitle('Home');
         setShowSearchIcon(false);
         setPageIcon(logoIcon);
-        setShowProfileIcon(false);
+        setShowProfileIcon(true);
     }
   }, [title, navigate, pathSplit]);
 
