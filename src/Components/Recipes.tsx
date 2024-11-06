@@ -1,9 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { set } from 'react-hook-form';
 import StoreContext from '../Context/StoreContext';
-import { requestApi } from '../Utils/ApiRequest';
-import DealResponse from '../Utils/DealResponse';
 import { CategoryType, FoodCardType } from '../Utils/Types';
 import CardRecipe from './CardRecipe';
 import {
@@ -16,7 +13,6 @@ import LoadingPage from './Loading';
 
 export default function Recipes() {
   const {
-    recipes,
     setLoadingPage,
     loadingPage,
     foodsCategories,
@@ -33,7 +29,10 @@ export default function Recipes() {
   const [type, setType] = useState<string>('');
 
   useEffect(() => {
-    function findType() {
+    const loadData = () => {
+      setLoadingPage(true);
+      console.log('true');
+
       const path = window.location.pathname.split('/')[1];
       setType(path);
 
@@ -42,16 +41,21 @@ export default function Recipes() {
         setData(foodsData);
         setCategoriesIcons(imagesIconsMeals);
         setAllIcon(allFoodIcon);
+        setCard(foodsData);
       } else {
         setCategories(drinksCategories);
         setData(drinksData);
         setCategoriesIcons(imagesIconsDrinks);
         setAllIcon(drinkIcon);
+        setCard(drinksData);
       }
-    }
-    setLoadingPage(true);
-    findType();
-    setLoadingPage(false);
+      console.log('false');
+
+      setTimeout(() => {
+        setLoadingPage(false);
+      }, 500);
+    };
+    loadData();
   }, [
     drinksCategories,
     drinksData,
@@ -60,15 +64,10 @@ export default function Recipes() {
     setLoadingPage,
   ]);
 
-  useEffect(() => {
-    setCard(recipes);
-  }, [recipes]);
-
-  async function changeRecipes(category: string) {
+  function changeRecipes(category: string) {
     setLoadingPage(true);
     if (category !== categorySelected) {
-      const response = await requestApi(type, 'category-data', category);
-      const newRecipes = DealResponse(type, response[type]).slice(0, 12);
+      const newRecipes = data.filter((recipe) => recipe.category === category);
 
       if (newRecipes) {
         setCard(newRecipes);

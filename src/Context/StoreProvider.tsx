@@ -22,52 +22,65 @@ function StoreProvider({ children } : StoreProviderProps) {
   const [drinksCategories, setDrinksCategories] = useState<CategoryType[]>([]);
 
   useEffect(() => {
-    async function requestFoodsAndDrinksFromAPI() {
-      const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-      const allMealsPromises = alphabet.split('').map(async (letter) => {
-        const mealsResponse = await requestApi('meals', 'firstLetter', letter);
-        if (mealsResponse.meals) {
-          const result = mealsResponse.meals;
-          return DealResponse('meals', result);
-        }
-        return [];
-      });
+    const fetchData = async () => {
+      await requestFoodsAndDrinksFromAPI();
+      await requestFoodsAndDrinksCategoriesFromAPI();
+    };
 
-      const allMealsResults = await Promise.all(allMealsPromises);
-      const allMeals = allMealsResults.flat();
+    const getDataFromLocalStorage = () => {
+      setFoodsData(JSON.parse(localStorage.getItem('foodsData') || '[]'));
+      setDrinksData(JSON.parse(localStorage.getItem('drinksData') || '[]'));
+      setFoodsCategories(JSON.parse(localStorage.getItem('foodsCategories') || '[]'));
+      setDrinksCategories(JSON.parse(localStorage.getItem('drinksCategories') || '[]'));
+    };
 
-      setFoodsData(allMeals);
-
-      const allDrinksPromises = alphabet.split('').map(async (letter) => {
-        const drinksResponse = await requestApi('drinks', 'firstLetter', letter);
-        if (drinksResponse.drinks) {
-          const result = drinksResponse.drinks;
-          return DealResponse('drinks', result);
-        }
-        return [];
-      });
-
-      const allDrinksResults = await Promise.all(allDrinksPromises);
-      const allDrinks = allDrinksResults.flat();
-
-      setDrinksData(allDrinks);
+    if (localStorage.getItem('foodsData') === null
+    || localStorage.getItem('drinksData') === null) {
+      fetchData();
+    } else {
+      getDataFromLocalStorage();
     }
-
-    async function requestFoodsAndDrinksCategoriesFromAPI() {
-      const mealsResponse = await requestApi('meals', 'categories', '');
-      if (mealsResponse.meals) {
-        const result = mealsResponse.meals;
-        setFoodsCategories(result);
-      }
-      const drinksResponse = await requestApi('drinks', 'categories', '');
-      if (drinksResponse.drinks) {
-        const result = drinksResponse.drinks;
-        setDrinksCategories(result);
-      }
-    }
-    requestFoodsAndDrinksFromAPI();
-    requestFoodsAndDrinksCategoriesFromAPI();
   }, []);
+
+  const requestFoodsAndDrinksFromAPI = async () => {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    const allMealsPromises = alphabet.split('').map(async (letter) => {
+      const mealsResponse = await requestApi('meals', 'firstLetter', letter);
+      if (mealsResponse.meals) {
+        return DealResponse('meals', mealsResponse.meals);
+      }
+      return [];
+    });
+    const allMealsResults = await Promise.all(allMealsPromises);
+    const allMeals = allMealsResults.flat();
+    setFoodsData(allMeals);
+    localStorage.setItem('foodsData', JSON.stringify(allMeals));
+
+    const allDrinksPromises = alphabet.split('').map(async (letter) => {
+      const drinksResponse = await requestApi('drinks', 'firstLetter', letter);
+      if (drinksResponse.drinks) {
+        return DealResponse('drinks', drinksResponse.drinks);
+      }
+      return [];
+    });
+    const allDrinksResults = await Promise.all(allDrinksPromises);
+    const allDrinks = allDrinksResults.flat();
+    setDrinksData(allDrinks);
+    localStorage.setItem('drinksData', JSON.stringify(allDrinks));
+  };
+
+  const requestFoodsAndDrinksCategoriesFromAPI = async () => {
+    const mealsResponse = await requestApi('meals', 'categories', '');
+    if (mealsResponse.meals) {
+      setFoodsCategories(mealsResponse.meals);
+      localStorage.setItem('foodsCategories', JSON.stringify(mealsResponse.meals));
+    }
+    const drinksResponse = await requestApi('drinks', 'categories', '');
+    if (drinksResponse.drinks) {
+      setDrinksCategories(drinksResponse.drinks);
+      localStorage.setItem('drinksCategories', JSON.stringify(drinksResponse.drinks));
+    }
+  };
 
   const handleDoneRecipes = (filter : string) => {
     const newDoneRecipes = filterRecipes(
