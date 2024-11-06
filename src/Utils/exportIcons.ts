@@ -24,8 +24,32 @@ import doneIcon from '../images/doneIcon.svg';
 import favoriteIcon from '../images/favoriteIcon.svg';
 import exitIcon from '../images/exitIcon.svg';
 import profileYellowIcon from '../images/profileYellowIcon.svg';
+import lambIcon from '../images/lambIcon.svg';
+import miscellaneousIcon from '../images/miscellaneousIcon.svg';
+import pastaIcon from '../images/pastaIcon.svg';
+import porkIcon from '../images/porkIcon.svg';
+import seafoodIcon from '../images/seafoodIcon.svg';
+import sideIcon from '../images/sideIcon.svg';
+import starterIcon from '../images/starterIcon.svg';
+import veganIcon from '../images/veganIcon.svg';
+import vegetarianIcon from '../images/vegetarianIcon.svg';
 
-const imagesIconsMeals = [beefIcon, breakFastIcon, chickenIcon, dessertIcon, goatIcon];
+const imagesIconsMeals = [
+  beefIcon,
+  breakFastIcon,
+  chickenIcon,
+  dessertIcon,
+  goatIcon,
+  lambIcon,
+  miscellaneousIcon,
+  pastaIcon,
+  porkIcon,
+  seafoodIcon,
+  sideIcon,
+  starterIcon,
+  veganIcon,
+  vegetarianIcon,
+];
 const imagesIconsDrinks = [ordinaryDrinkIcon,
   cocktailIcon, shakeIcon, beerIcon, cocoaIcon];
 

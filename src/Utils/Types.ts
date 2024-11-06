@@ -50,6 +50,10 @@ export type StoreContextType = {
   showByDoneFilter: boolean,
   showByFavFilter: boolean,
   loadingPage : boolean,
+  foodsData: FoodCardType[],
+  drinksData: FoodCardType[],
+  foodsCategories: CategoryType[],
+  drinksCategories: CategoryType[]
 };
 
 export type CardRecipe = {

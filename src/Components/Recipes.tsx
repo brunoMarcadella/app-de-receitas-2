@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { set } from 'react-hook-form';
 import StoreContext from '../Context/StoreContext';
 import { requestApi } from '../Utils/ApiRequest';
 import DealResponse from '../Utils/DealResponse';
@@ -14,44 +15,51 @@ import { CategoriesContainer, FinalContainer, ImageContainer,
 import LoadingPage from './Loading';
 
 export default function Recipes() {
-  const { recipes, setLoadingPage, loadingPage } = useContext(StoreContext);
-  const [data, setData] = useState([] as FoodCardType[]);
-  const [cards, setCard] = useState([] as FoodCardType[]);
-  const [categories, setCategories] = useState([] as CategoryType[]);
+  const {
+    recipes,
+    setLoadingPage,
+    loadingPage,
+    foodsCategories,
+    drinksCategories,
+    foodsData,
+    drinksData,
+  } = useContext(StoreContext);
+  const [data, setData] = useState<FoodCardType[]>([]);
+  const [cards, setCard] = useState<FoodCardType[]>([]);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
   const [categorySelected, setCategorySelected] = useState('');
   const [allIcon, setAllIcon] = useState(allFoodIcon);
+  const [categoriesIcons, setCategoriesIcons] = useState<string[]>([]);
+  const [type, setType] = useState<string>('');
 
-  const path = window.location.pathname;
-  const newFood = path.split('/')[1];
-
-  // O primeiro Effect é chamado quando a página é carregada.
   useEffect(() => {
-    async function requestRecipes() {
-      setLoadingPage(true);
-      const response = await requestApi(newFood, '', '');
-      if (response[newFood]) {
-        const result = response[newFood].slice(0, 12);
-        const newList: FoodCardType[] = DealResponse(newFood, result);
-        setData(newList);
-        setCard(newList);
-      }
-      setLoadingPage(false);
-    }
-    async function requestCategories() {
-      setLoadingPage(true);
-      const response = await requestApi(newFood, 'categories', '');
-      if (response[newFood]) {
-        const result: CategoryType[] = response[newFood].slice(0, 5);
-        setCategories(result);
-      }
-      setLoadingPage(false);
-    }
+    function findType() {
+      const path = window.location.pathname.split('/')[1];
+      setType(path);
 
-    requestRecipes();
-    requestCategories();
-  }, [newFood, setLoadingPage]);
+      if (path === 'meals') {
+        setCategories(foodsCategories);
+        setData(foodsData);
+        setCategoriesIcons(imagesIconsMeals);
+        setAllIcon(allFoodIcon);
+      } else {
+        setCategories(drinksCategories);
+        setData(drinksData);
+        setCategoriesIcons(imagesIconsDrinks);
+        setAllIcon(drinkIcon);
+      }
+    }
+    setLoadingPage(true);
+    findType();
+    setLoadingPage(false);
+  }, [
+    drinksCategories,
+    drinksData,
+    foodsCategories,
+    foodsData,
+    setLoadingPage,
+  ]);
 
-  // O segundo Effect é chamado quando a variável recipes é alterada pelo searchBar
   useEffect(() => {
     setCard(recipes);
   }, [recipes]);
@@ -59,8 +67,8 @@ export default function Recipes() {
   async function changeRecipes(category: string) {
     setLoadingPage(true);
     if (category !== categorySelected) {
-      const response = await requestApi(newFood, 'category-data', category);
-      const newRecipes = DealResponse(newFood, response[newFood]).slice(0, 12);
+      const response = await requestApi(type, 'category-data', category);
+      const newRecipes = DealResponse(type, response[type]).slice(0, 12);
 
       if (newRecipes) {
         setCard(newRecipes);
@@ -73,30 +81,8 @@ export default function Recipes() {
     setLoadingPage(false);
   }
 
-  useEffect(() => {
-    const iconsATT = () => {
-      if (path === '/meals') {
-        setAllIcon(allFoodIcon);
-      }
-      if (path === '/drinks') {
-        setAllIcon(drinkIcon);
-      }
-    };
-    iconsATT();
-  }, [path]);
-
-  const icons = (index: number) => {
-    if (path === '/meals') {
-      return imagesIconsMeals[index];
-    }
-    if (path === '/drinks') {
-      return imagesIconsDrinks[index];
-    }
-  };
-
   const FilterCategories = (
     <CategoriesContainer>
-
       <button
         data-testid="All-category-filter"
         onClick={ () => setCard(data) }
@@ -104,47 +90,41 @@ export default function Recipes() {
         <ImageContainer>
           <img src={ allIcon } alt="Button" />
         </ImageContainer>
-
-        <TextContainer>
-          All
-        </TextContainer>
-
+        <TextContainer>All</TextContainer>
       </button>
-
-      {
-        categories.map(({ strCategory }, index) => (
-          <button
-            key={ index }
-            data-testid={ `${strCategory}-category-filter` }
-            onClick={ () => changeRecipes(strCategory) }
-          >
-            <ImageContainer>
-              <img src={ icons(index) } alt={ `Button-${icons(index)}` } />
-            </ImageContainer>
-
-            <TextContainer>
-              {strCategory}
-            </TextContainer>
-          </button>
-        ))
-      }
-
+      {categories.map(({ strCategory }, index) => (
+        <button
+          key={ index }
+          data-testid={ `${strCategory}-category-filter` }
+          onClick={ () => changeRecipes(strCategory) }
+        >
+          <ImageContainer>
+            <img
+              src={ categoriesIcons[index] }
+              alt={ `Button-${categoriesIcons[index]}` }
+            />
+          </ImageContainer>
+          <TextContainer>{strCategory}</TextContainer>
+        </button>
+      ))}
     </CategoriesContainer>
   );
-  if (loadingPage) return <LoadingPage />;
+
   return (
-    <div>
-      {FilterCategories}
-      <FinalContainer>
-        {
-        cards.map((recipe, index) => (
-          <div key={ index }>
-            <Link to={ `/${newFood}/${recipe.id}` }>
-              <CardRecipe food={ recipe } page="recipes" index={ index } />
-            </Link>
-          </div>))
-      }
-      </FinalContainer>
-    </div>
+    loadingPage ? <LoadingPage />
+      : (
+        <div>
+          {FilterCategories}
+          <FinalContainer>
+            {cards.map((recipe, index) => (
+              <div key={ index }>
+                <Link to={ `/${type}/${recipe.id}` }>
+                  <CardRecipe food={ recipe } page="recipes" index={ index } />
+                </Link>
+              </div>
+            ))}
+          </FinalContainer>
+        </div>
+      )
   );
 }
